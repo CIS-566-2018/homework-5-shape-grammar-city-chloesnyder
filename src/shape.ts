@@ -39,7 +39,10 @@ class Shape {
         this.scale = scale;
 
         this.mesh = new Mesh(vec3.fromValues(0, 0, 0));
-        if(t)
+
+      //  this. mesh.loadBuffers(this.readTextFile('src/objs/cube.obj'));
+        
+       if(sym === "R")
         {
             //terminal, so made a roof.
             this. mesh.loadBuffers(this.readTextFile('src/objs/pyramid.obj'));

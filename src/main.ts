@@ -60,8 +60,7 @@ function loadScene() {
   var instructions = new Rule().createLSystem(numIter, axiom);
 
   building = new ShapeSet();
-  debugger;
-  building.parseShapeGrammar("S", 1);
+  building.parseShapeGrammar(5);
   building.create();
  
 }
