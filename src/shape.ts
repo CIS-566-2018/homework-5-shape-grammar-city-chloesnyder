@@ -39,14 +39,13 @@ class Shape {
         this.scale = scale;
 
         this.mesh = new Mesh(vec3.fromValues(0, 0, 0));
-
-      //  this. mesh.loadBuffers(this.readTextFile('src/objs/cube.obj'));
         
        if(sym === "C")
         {
             //roof
             this. mesh.loadBuffers(this.readTextFile('src/objs/cylinder.obj'));
-
+        } else if (sym === "B") {
+            this.mesh.loadBuffers(this.readTextFile('src/objs/bridge.obj'));
         } else {
            this. mesh.loadBuffers(this.readTextFile('src/objs/cube.obj'));
         }

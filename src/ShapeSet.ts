@@ -34,10 +34,12 @@ class  ShapeSet extends Drawable
     constructor()
     {
         super();
-        this.sx = 10;
-        this.sy = 10;
-        this.sz = 10;
-        this.shapes.push(new Shape("S", false, vec3.fromValues(0, 0, 0), vec3.fromValues(0, this.sy, 0), vec3.fromValues(this.sx,this.sy,this.sz)));
+        this.sx = 5;
+        this.sy = 5;
+        this.sz = 5;
+        // starting height between .5 and sy/
+        var ypos = Math.random() * (this.sy/2 - .5) + .5;
+        this.shapes.push(new Shape("S", false, vec3.fromValues(0, ypos, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(this.sx,this.sy,this.sz)));
     }
 
     create()
@@ -88,30 +90,13 @@ class  ShapeSet extends Drawable
         {
             var ground = vec3.fromValues(0, 0, 0);
             var pos = s.position;
-            var dy = s.position[1] - ground[1];
+            var dy = s.position[1] - (s.scale[1]/2);
 
-            //if(dy > .1)
-           // {
-                // place one column directly below
-                // need to determne a scale such that the cylinder goes from bottom of shape it's being placed below
-                // to the ground
-
-
-                var currYScale = s.scale[1];
-                var columnScale = vec3.fromValues(.5 * s.scale[0], .375 * s.scale[1], .5 * s.scale[0]);
-                columns.push(new Shape ("C", true, vec3.fromValues(s.position[0], s.position[1] / 2, s.position[2]), s.rotation, columnScale));
-               /* var y_pos = s.position[1] - (dy);
-                var columnPXPZ = vec3.fromValues(s.position[0] + .25, y_pos, s.position[2] + .25);
-                var columnPXNZ = vec3.fromValues(s.position[0] + .25, y_pos, s.position[2] - .25);
-                var columnNXPZ = vec3.fromValues(s.position[0] - .25, y_pos, s.position[2] + .25);
-                var columnNXNZ = vec3.fromValues(s.position[0] - .25, y_pos, s.position[2] - .25);
-                var columnScale = vec3.fromValues(.5 * s.scale[0], 1.0, .5 * s.scale[2]);
-                
-                columns.push(new Shape("", true, columnPXPZ, s.rotation, columnScale));
-                columns.push(new Shape("", true, columnPXNZ, s.rotation, columnScale));
-                columns.push(new Shape("", true, columnNXPZ, s.rotation, columnScale));
-                columns.push(new Shape("", true, columnNXNZ, s.rotation, columnScale));*/
-          // }
+            if(dy > 0)
+            {
+                var columnScale = vec3.fromValues(.5 * s.scale[0], dy / 2, .5 * s.scale[0]);
+                columns.push(new Shape ("C", true, vec3.fromValues(s.position[0], dy / 2, s.position[2]), s.rotation, columnScale));
+          }
         }
         this.shapes = this.shapes.concat(columns);
     }
@@ -140,20 +125,18 @@ class  ShapeSet extends Drawable
         // generates a random rule
         var seed = Math.random();
         var noise = seed; //TODO: some kind of noise function to vary the seed?
-        if(noise < (1/7))
+        if(noise < (1/6))
         {
             return "S";
-        } else if (noise > (1/7) && noise < (2/7)) {
+        } else if (noise > (1/6) && noise < (2/6)) {
             return "X";
-        } else if (noise > (3/7) && noise < (4/7)) {
+        } else if (noise > (3/6) && noise < (4/6)) {
             return "Y";
-        } else if (noise > (4/7) && noise < (5/7)) {
+        } else if (noise > (4/6) && noise < (5/6)) {
             return "Z";
-        } else if (noise > (5/7) && noise < (6/7)) {
+        } else if (noise > (5/6) && noise < (6/6)) {
             return "D";
-        } else {
-            return ""; 
-        }
+        } 
        
     }
 
@@ -165,82 +148,61 @@ class  ShapeSet extends Drawable
         
             if(rule === "S")
             {
- 
+
+
                 // subdivide into 8 cubes
                 var parentPos = s.position;
                 var parentScale = s.scale;
                 var childScale = vec3.fromValues(parentScale[0] / 8, parentScale[1] / 8, parentScale[2] / 8);
 
-                var topPos1= vec3.fromValues(parentPos[0] + .25, parentPos[1] + .5, parentPos[2] + .25); // top floor
-                var bottomPos1 =  vec3.fromValues(parentPos[0] + .25, parentPos[1], parentPos[2] + .25); // bottom floor
+                 // if parent position y is greater than 0, then we can move the floors down but don't otherwise
+                var transYDownBy = 0;
+                if(parentPos[1] > 0)
+                {
+                    transYDownBy = Math.random() / 2;
+                }
+
+                var topPos1= vec3.fromValues(parentPos[0] + .25, parentPos[1] + (Math.random() / 2), parentPos[2] + .25); // top floor
+                var bottomPos1 =  vec3.fromValues(parentPos[0] + .25, parentPos[1] - transYDownBy, parentPos[2] + .25); // bottom floor
                 var bottomRule1 = this.randomRule();
                 var topRule1 = this.randomRule();
                 var isTopTerminal1 = Math.random() > .5;
                 var isBottomTerminal1 = Math.random() > .5;
-                // if a top floor is generated and the bottom floor is deleted, replace bottom floor rule with "C" so it is replaced with 
-                // 4 columns, and make those columns terminal
-                while(bottomRule1 === "R")
+
+
+                if(parentPos[1] > 0)
                 {
-                    bottomRule1 = this.randomRule();
-                }
-              /*  if(topRule1 !== "D" && bottomRule1 === "D")
-                {
-                    bottomRule1 = "C";
-                    isTopTerminal1 = true;
-                    isBottomTerminal1 = true;
-                }*/
-            
-                
-                var topPos2 =  vec3.fromValues(parentPos[0] + .25, parentPos[1] + .5, parentPos[2] - .25); // top floor
-                var bottomPos2 =  vec3.fromValues(parentPos[0] + .25, parentPos[1], parentPos[2] - .25); // bottom floor
+                    transYDownBy = Math.random() / 2;
+                }      
+                var topPos2 =  vec3.fromValues(parentPos[0] + .25, parentPos[1] + (Math.random() / 2), parentPos[2] - .25); // top floor
+                var bottomPos2 =  vec3.fromValues(parentPos[0] + .25, parentPos[1] - transYDownBy, parentPos[2] - .25); // bottom floor
                 var bottomRule2 = this.randomRule();
                 var topRule2 = this.randomRule();
                 var isTopTerminal2 = Math.random() > .5;
                 var isBottomTerminal2 = Math.random() > .5;
-                while(bottomRule2 === "R")
-                {
-                    bottomRule2 = this.randomRule();
-                }
-            /*    if(topRule2 !== "D" && bottomRule2 === "D")
-                {
-                    bottomRule2 = "C";
-                    isTopTerminal2 = true;
-                    isBottomTerminal2 = true;
-                }*/
 
-                var topPos3 =  vec3.fromValues(parentPos[0] - .25, parentPos[1] + .5, parentPos[2] + .25); // top floor
-                var bottomPos3 =  vec3.fromValues(parentPos[0] - .25, parentPos[1], parentPos[2] + .25); // bottom floor
+
+                if(parentPos[1] > 0)
+                {
+                    transYDownBy = Math.random() / 2;
+                }
+                var topPos3 =  vec3.fromValues(parentPos[0] - .25, parentPos[1] + (Math.random() / 2), parentPos[2] + .25); // top floor
+                var bottomPos3 =  vec3.fromValues(parentPos[0] - .25, parentPos[1] - transYDownBy, parentPos[2] + .25); // bottom floor
                 var bottomRule3 = this.randomRule();
                 var topRule3 = this.randomRule();
                 var isTopTerminal3 = Math.random() > .5;
                 var isBottomTerminal3 = Math.random() > .5;
-                while(bottomRule3 === "R")
+
+                if(parentPos[1] > 0)
                 {
-                    bottomRule3 = this.randomRule();
+                    transYDownBy = Math.random() / 2;
                 }
-              /*  if(topRule3 !== "D" && bottomRule3 === "D")
-                {
-                    bottomRule3 = "C";
-                    isTopTerminal3 = true;
-                    isBottomTerminal3 = true;
-                }*/
-                
-                var topPos4 = vec3.fromValues(parentPos[0] - .25, parentPos[1] + .5, parentPos[2] - .25); // top floor
-                var bottomPos4 = vec3.fromValues(parentPos[0] - .25, parentPos[1], parentPos[2] - .25); // bottom floor
+                var topPos4 = vec3.fromValues(parentPos[0] - .25, parentPos[1] + (Math.random() / 2), parentPos[2] - .25); // top floor
+                var bottomPos4 = vec3.fromValues(parentPos[0] - .25, parentPos[1] - transYDownBy, parentPos[2] - .25); // bottom floor
                 var bottomRule4 = this.randomRule();
                 var topRule4 = this.randomRule();
                 var isTopTerminal4 = Math.random() > .5;
                 var isBottomTerminal4 = Math.random() > .5;
-                while(bottomRule4 === "R")
-                {
-                    bottomRule4 = this.randomRule();
-                }
-              /*  if(topRule4 !== "D" && bottomRule4 === "D")
-                {
-                    bottomRule4 = "C";
-                    isTopTerminal3 = true;
-                    isBottomTerminal3 = true;
-                }*/
 
                  // add the successors to the shape set
                 successors.push(new Shape(bottomRule1, isBottomTerminal1, bottomPos1, s.rotation, childScale));
@@ -268,9 +230,7 @@ class  ShapeSet extends Drawable
                 //scale in Z direction
                 var childScale = vec3.fromValues(.5 * s.scale[0],  .5 * s.scale[1], s.scale[2]);
                 successors.push(new Shape(this.randomRule(), Math.random() > .5, s.position, s.rotation, childScale));
-            } else if (rule === "R") {
-                successors.push(new Shape("R", true, s.position, s.rotation, s.scale)); 
-            } 
+            }
       
         }
 

@@ -59,6 +59,7 @@ function loadScene() {
 
   var instructions = new Rule().createLSystem(numIter, axiom);
 
+  square = new Square(vec3.fromValues(0, 0, 0));
   building = new ShapeSet();
   building.parseShapeGrammar(5);
   building.create();
@@ -114,7 +115,7 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     renderer.render(camera, lambert, [// mesh,
-      building, 
+      building, square,
     ]);
     stats.end();
 
