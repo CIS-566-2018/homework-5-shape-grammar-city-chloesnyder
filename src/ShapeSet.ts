@@ -82,6 +82,76 @@ class  ShapeSet extends Drawable
         console.log(this.indices); 
     }
 
+    addBridges(columns: Array<Shape>)
+    {
+        for(var i = 0; i < columns.length; i++)
+        {
+            var c = columns[i];//new Shape("", true, columns[i].position, columns[i].rotation, columns[i].scale);
+            // remove the column from the set
+            columns.splice(i, 1);
+            if(columns.length > 1)
+            {
+                // randomly choose another column to connect it to
+                var idx = Math.floor(Math.random() * columns.length);
+                var c2 = columns[idx];
+                // want it to have the same x or z pos
+                var xSame = c2.position[0] != c.position[0];
+                var zSame = c2.position[2] != c.position[2];  
+                while(!xSame && !zSame)
+                {
+                    idx = Math.floor(Math.random() * columns.length);
+                    c2 = columns[idx];
+                    xSame = c2.position[0] != c.position[0];
+                    zSame = c2.position[2] != c.position[2];  
+                }
+
+                // remove this column from list of columsn so we can't draw anymore bridges
+                columns.splice(idx, 1);
+
+                var bridgePos = vec3.create();
+                var bridgeScale = vec3.create();
+                var bridgeRot = vec3.create();
+
+                var yAngle = 0;
+
+                if(xSame)
+                {
+                    //if x same, draw bridge from one column to the other along the x axis
+                    yAngle = PI/2;
+
+                } else if (zSame)
+                {
+                     //if z same, draw bridge from one column to the other along z axis
+                     yAngle = 0;
+
+                }
+
+                bridgePos = vec3.fromValues((c.position[0] - c2.position[0])/2, c.position[1]/2, (c.position[2] - c2.position[2])/2);
+                //vec3.fromValues(((c.position[0] - (c.scale[0]/2)) + (c2.position[0] - (c2.scale[0]/2)))/2, (((c.position[1] - (c.scale[1]/2)) + (c2.position[1] - (c2.scale[1]/2))) + (Math.random()/2))/2, ((c.position[2] - (c.scale[2]/2)) + (c2.position[2] - (c2.scale[2]/2)))/2);
+                bridgeScale;
+                bridgeRot;
+
+                bridgeRot = vec3.fromValues(0, yAngle, yAngle);
+
+                var scaleZ = Math.min(c2.scale[2], c.scale[2]);
+                var scaleY = Math.min(c2.scale[1], c.scale[1]);
+                var scaleX = Math.min(c2.scale[0], c.scale[0]);
+
+                // get z distance between the cylinders
+                var dx = Math.abs((c2.position[0] - (c2.scale[0]/2)) - (c.position[0]) - (c.scale[0]/2));
+                var dz = Math.abs((c2.position[2] - (c2.scale[2]/2)) - (c.position[2]) - (c.scale[2]/2));
+                if(dx > dz)
+                {
+                    scaleZ = dz;
+                } else {
+                    scaleX = dx;
+                }
+                
+                this.shapes.push(new Shape("B", true, bridgePos, bridgeRot, vec3.fromValues(scaleX, scaleY, scaleZ)));
+            }
+        }
+    }
+
     addColumns()
     {
         // add "columns" below all shapes not already at ground level
@@ -99,6 +169,7 @@ class  ShapeSet extends Drawable
           }
         }
         this.shapes = this.shapes.concat(columns);
+        this.addBridges(columns);
     }
 
     //Apply rules to all shpaes in our shape set for n iterations
