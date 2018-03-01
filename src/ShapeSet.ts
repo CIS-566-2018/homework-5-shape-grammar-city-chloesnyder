@@ -31,15 +31,15 @@ class  ShapeSet extends Drawable
     sy: number;
     sz: number;
 
-    constructor()
+    constructor(scale: number, xpos: number, zpos: number)
     {
         super();
-        this.sx = 5;
-        this.sy = 5;
-        this.sz = 5;
+        this.sx = 5 * scale;
+        this.sy = 5 * scale;
+        this.sz = 5 * scale;
         // starting height between .5 and sy/
         var ypos = Math.random() * (this.sy/2 - .5) + .5;
-        this.shapes.push(new Shape("S", false, vec3.fromValues(0, ypos, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(this.sx,this.sy,this.sz)));
+        this.shapes.push(new Shape("S", false, vec3.fromValues(xpos, ypos, zpos), vec3.fromValues(0, 0, 0), vec3.fromValues(this.sx,this.sy,this.sz)));
     }
 
     create()
@@ -60,12 +60,9 @@ class  ShapeSet extends Drawable
         this.positions = new Float32Array(this.t_positions);
         this.indices = new Uint32Array(this.t_indices);
 
-       // this.colors
-
         this.generateIdx();
         this.generatePos();
         this.generateNor();
-       // this.generateColor();
     
         this.count = this.indices.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufIdx);
@@ -76,13 +73,16 @@ class  ShapeSet extends Drawable
     
         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufPos);
         gl.bufferData(gl.ARRAY_BUFFER, this.positions, gl.STATIC_DRAW);
-
-        console.log(this.positions);
-        console.log(this.normals);
-        console.log(this.indices); 
     }
 
-    addBridges(columns: Array<Shape>)
+    // creates a ground plane
+    addGround()
+    {
+        this.shapes = new Array<Shape>();
+        this.shapes.push(new Shape("", true, vec3.fromValues(0, 0, 0), vec3.fromValues(0,0,0), vec3.fromValues(20, .2, 20)));
+    }
+
+  /*  addBridges(columns: Array<Shape>)
     {
         for(var i = 0; i < columns.length; i++)
         {
@@ -150,7 +150,7 @@ class  ShapeSet extends Drawable
                 this.shapes.push(new Shape("B", true, bridgePos, bridgeRot, vec3.fromValues(scaleX, scaleY, scaleZ)));
             }
         }
-    }
+    }*/
 
     addColumns()
     {
@@ -169,7 +169,7 @@ class  ShapeSet extends Drawable
           }
         }
         this.shapes = this.shapes.concat(columns);
-        this.addBridges(columns);
+       // this.addBridges(columns);
     }
 
     //Apply rules to all shpaes in our shape set for n iterations

@@ -27,6 +27,8 @@ const controls = {
 let icosphere: Icosphere;
 let square: Square;
 let building: ShapeSet;
+let buildings: Array<ShapeSet>;
+let groundplane: ShapeSet;
 let mesh: Mesh;
 
  //https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file
@@ -59,11 +61,29 @@ function loadScene() {
 
   var instructions = new Rule().createLSystem(numIter, axiom);
 
-  square = new Square(vec3.fromValues(0, 0, 0));
-  building = new ShapeSet();
-  building.parseShapeGrammar(5);
-  building.create();
- 
+
+  // generate a ground plane
+  groundplane = new ShapeSet(1.0, 0, 0);
+  groundplane.addGround();
+  groundplane.create();
+  buildings = new Array<ShapeSet>();
+
+
+  for(var i = 0; i < 5; i++)
+  {
+    var x = Math.random() * 8;
+    var z = Math.random() * 8;
+    var px = Math.random();
+    if(px > .5) x *= -1;
+    var pz = Math.random();
+    if(pz > .5) z *= -1;
+
+    building = new ShapeSet(1.0, x, z);
+    var iter = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
+    building.parseShapeGrammar(iter);
+    building.create();
+    buildings.push(building);
+  }
 }
 
 function main() {
@@ -97,7 +117,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 10, 10), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
@@ -108,15 +128,45 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
   ]);
 
+  const lambert2 = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag2.glsl')),
+  ]);
+
+  const lambert3 = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag3.glsl')),
+  ]);
+
+  const lambert4 = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag4.glsl')),
+  ]);
+
+  var shader = lambert;
+  var chooseShader = Math.floor(Math.random() * (4));
+  if(chooseShader == 1)
+  {
+    shader = lambert;
+  } else if (chooseShader == 2) {
+    shader = lambert2;
+  } else if (chooseShader == 3) {
+    shader = lambert3;
+  } else {
+    shader = lambert4;
+  }
+
+
   // This function will be called every frame
   function tick() {
     camera.update();
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
-    renderer.render(camera, lambert, [// mesh,
-      building, square,
-    ]);
+    var toDraw = [groundplane];
+    toDraw = toDraw.concat(buildings);
+   // toDraw.concat
+    renderer.render(camera, shader, toDraw);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
