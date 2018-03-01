@@ -42,13 +42,12 @@ class Shape {
 
       //  this. mesh.loadBuffers(this.readTextFile('src/objs/cube.obj'));
         
-       if(sym === "R")
+       if(sym === "C")
         {
-            //terminal, so made a roof.
-            this. mesh.loadBuffers(this.readTextFile('src/objs/pyramid.obj'));
+            //roof
+            this. mesh.loadBuffers(this.readTextFile('src/objs/cylinder.obj'));
 
         } else {
-            // not terminal, so a cube
            this. mesh.loadBuffers(this.readTextFile('src/objs/cube.obj'));
         }
 

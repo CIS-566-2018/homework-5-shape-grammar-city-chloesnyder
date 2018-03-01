@@ -27,13 +27,19 @@ class  ShapeSet extends Drawable
 
     shapes: Array<Shape> = new Array();
 
+    sx: number;
+    sy: number;
+    sz: number;
+
     constructor()
     {
         super();
-        this.shapes.push(new Shape("S", false, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(10,10,10)));
+        this.sx = 10;
+        this.sy = 10;
+        this.sz = 10;
+        this.shapes.push(new Shape("S", false, vec3.fromValues(0, 0, 0), vec3.fromValues(0, this.sy, 0), vec3.fromValues(this.sx,this.sy,this.sz)));
     }
 
-    // TurtleStack holds the overall VBOs, now we copy them and create the final LSystem
     create()
     {
         // go through every shape in the set, and append their normals and positions to shapeSet data
@@ -74,6 +80,42 @@ class  ShapeSet extends Drawable
         console.log(this.indices); 
     }
 
+    addColumns()
+    {
+        // add "columns" below all shapes not already at ground level
+        var columns = new Array<Shape>();
+        for(let s of this.shapes)
+        {
+            var ground = vec3.fromValues(0, 0, 0);
+            var pos = s.position;
+            var dy = s.position[1] - ground[1];
+
+            //if(dy > .1)
+           // {
+                // place one column directly below
+                // need to determne a scale such that the cylinder goes from bottom of shape it's being placed below
+                // to the ground
+
+
+                var currYScale = s.scale[1];
+                var columnScale = vec3.fromValues(.5 * s.scale[0], .375 * s.scale[1], .5 * s.scale[0]);
+                columns.push(new Shape ("C", true, vec3.fromValues(s.position[0], s.position[1] / 2, s.position[2]), s.rotation, columnScale));
+               /* var y_pos = s.position[1] - (dy);
+                var columnPXPZ = vec3.fromValues(s.position[0] + .25, y_pos, s.position[2] + .25);
+                var columnPXNZ = vec3.fromValues(s.position[0] + .25, y_pos, s.position[2] - .25);
+                var columnNXPZ = vec3.fromValues(s.position[0] - .25, y_pos, s.position[2] + .25);
+                var columnNXNZ = vec3.fromValues(s.position[0] - .25, y_pos, s.position[2] - .25);
+                var columnScale = vec3.fromValues(.5 * s.scale[0], 1.0, .5 * s.scale[2]);
+                
+                columns.push(new Shape("", true, columnPXPZ, s.rotation, columnScale));
+                columns.push(new Shape("", true, columnPXNZ, s.rotation, columnScale));
+                columns.push(new Shape("", true, columnNXPZ, s.rotation, columnScale));
+                columns.push(new Shape("", true, columnNXNZ, s.rotation, columnScale));*/
+          // }
+        }
+        this.shapes = this.shapes.concat(columns);
+    }
+
     //Apply rules to all shpaes in our shape set for n iterations
     parseShapeGrammar(iter: number)
     {
@@ -90,8 +132,7 @@ class  ShapeSet extends Drawable
             }
         }
 
-        // add "columns" to any floating shapes
-        // go through each shape, check to see if it is 
+       this.addColumns();
     }
 
     randomRule() : string
@@ -109,9 +150,9 @@ class  ShapeSet extends Drawable
         } else if (noise > (4/7) && noise < (5/7)) {
             return "Z";
         } else if (noise > (5/7) && noise < (6/7)) {
-            return "C";
+            return "D";
         } else {
-            return "R";
+            return ""; 
         }
        
     }
@@ -138,12 +179,17 @@ class  ShapeSet extends Drawable
                 var isBottomTerminal1 = Math.random() > .5;
                 // if a top floor is generated and the bottom floor is deleted, replace bottom floor rule with "C" so it is replaced with 
                 // 4 columns, and make those columns terminal
-                if(topRule1 !== "D" && bottomRule1 === "D")
+                while(bottomRule1 === "R")
+                {
+                    bottomRule1 = this.randomRule();
+                }
+              /*  if(topRule1 !== "D" && bottomRule1 === "D")
                 {
                     bottomRule1 = "C";
                     isTopTerminal1 = true;
                     isBottomTerminal1 = true;
-                }
+                }*/
+            
                 
                 var topPos2 =  vec3.fromValues(parentPos[0] + .25, parentPos[1] + .5, parentPos[2] - .25); // top floor
                 var bottomPos2 =  vec3.fromValues(parentPos[0] + .25, parentPos[1], parentPos[2] - .25); // bottom floor
@@ -151,12 +197,16 @@ class  ShapeSet extends Drawable
                 var topRule2 = this.randomRule();
                 var isTopTerminal2 = Math.random() > .5;
                 var isBottomTerminal2 = Math.random() > .5;
-                if(topRule2 !== "D" && bottomRule2 === "D")
+                while(bottomRule2 === "R")
+                {
+                    bottomRule2 = this.randomRule();
+                }
+            /*    if(topRule2 !== "D" && bottomRule2 === "D")
                 {
                     bottomRule2 = "C";
                     isTopTerminal2 = true;
                     isBottomTerminal2 = true;
-                }
+                }*/
 
                 var topPos3 =  vec3.fromValues(parentPos[0] - .25, parentPos[1] + .5, parentPos[2] + .25); // top floor
                 var bottomPos3 =  vec3.fromValues(parentPos[0] - .25, parentPos[1], parentPos[2] + .25); // bottom floor
@@ -164,12 +214,16 @@ class  ShapeSet extends Drawable
                 var topRule3 = this.randomRule();
                 var isTopTerminal3 = Math.random() > .5;
                 var isBottomTerminal3 = Math.random() > .5;
-                if(topRule3 !== "D" && bottomRule3 === "D")
+                while(bottomRule3 === "R")
+                {
+                    bottomRule3 = this.randomRule();
+                }
+              /*  if(topRule3 !== "D" && bottomRule3 === "D")
                 {
                     bottomRule3 = "C";
                     isTopTerminal3 = true;
                     isBottomTerminal3 = true;
-                }
+                }*/
                 
                 var topPos4 = vec3.fromValues(parentPos[0] - .25, parentPos[1] + .5, parentPos[2] - .25); // top floor
                 var bottomPos4 = vec3.fromValues(parentPos[0] - .25, parentPos[1], parentPos[2] - .25); // bottom floor
@@ -177,12 +231,16 @@ class  ShapeSet extends Drawable
                 var topRule4 = this.randomRule();
                 var isTopTerminal4 = Math.random() > .5;
                 var isBottomTerminal4 = Math.random() > .5;
-                if(topRule4 !== "D" && bottomRule4 === "D")
+                while(bottomRule4 === "R")
+                {
+                    bottomRule4 = this.randomRule();
+                }
+              /*  if(topRule4 !== "D" && bottomRule4 === "D")
                 {
                     bottomRule4 = "C";
                     isTopTerminal3 = true;
                     isBottomTerminal3 = true;
-                }
+                }*/
 
                  // add the successors to the shape set
                 successors.push(new Shape(bottomRule1, isBottomTerminal1, bottomPos1, s.rotation, childScale));
@@ -200,8 +258,6 @@ class  ShapeSet extends Drawable
                 //scale in X direction
                 var childScale = vec3.fromValues(s.scale[0],  .5 * s.scale[1], .5 * s.scale[2]);
                 successors.push(new Shape(this.randomRule(), Math.random() > .5, s.position, s.rotation, childScale));
-                // add a column beneath
-                successors.push(new Shape("", true, vec3.fromValues(s.position[0], s.position[1] - .5, s.position[2]), s.rotation, vec3.fromValues(childScale[0] * .5, s.scale[1], childScale[2] * .5)));
             } else if (rule === "Y")
             {
                 //scale in Y direction
@@ -212,16 +268,9 @@ class  ShapeSet extends Drawable
                 //scale in Z direction
                 var childScale = vec3.fromValues(.5 * s.scale[0],  .5 * s.scale[1], s.scale[2]);
                 successors.push(new Shape(this.randomRule(), Math.random() > .5, s.position, s.rotation, childScale));
-                // add a column beneath
-                 // add a column beneath
-                 successors.push(new Shape("", true, vec3.fromValues(s.position[0], s.position[1] - .5, s.position[2]), s.rotation, vec3.fromValues(childScale[0] * .5, s.scale[1], childScale[2] * .5)));
             } else if (rule === "R") {
                 successors.push(new Shape("R", true, s.position, s.rotation, s.scale)); 
-            } else if (rule === "C") {
-                // subdivide into 4 columns
-               // var childScale = vec3.fromValues(.25 * s.scale[0], 5.0 * s.scale[1], .25 * s.scale[2]); // scale to 1/4th the size but preserve y scale
-               // successors.push((new Shape("", true, s.position, s.rotation, childScale)));
-            }
+            } 
       
         }
 
