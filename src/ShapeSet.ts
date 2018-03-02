@@ -61,30 +61,32 @@ class  ShapeSet extends Drawable
         this.color = vec3.fromValues(1, 1, 1);
     }
 
+    loadTempBuffers()
+    {
+          // go through every shape in the set, and append their normals and positions to shapeSet data
+          for(let s of this.shapes)
+          {
+              var offset = Math.floor(this.t_positions.length / 4.0);
+              for(var j = 0; j < s.meshCount; j++)
+              {
+                   this.t_indices.push(s.indices[j] + offset);
+              }
+  
+              this.t_positions = this.t_positions.concat(s.positions);
+              this.t_normals = this.t_normals.concat(s.normals);
+          }
+          for(var i = 0; i < this.t_positions.length; i++)
+          {  
+              this.t_colors.push(this.color[0]);
+              this.t_colors.push(this.color[1]);
+              this.t_colors.push(this.color[2]);
+              this.t_colors.push(1);
+          }
+    }
+
     create()
     {
-        // go through every shape in the set, and append their normals and positions to shapeSet data
-        for(let s of this.shapes)
-        {
-            var offset = Math.floor(this.t_positions.length / 4.0);
-            for(var j = 0; j < s.meshCount; j++)
-            {
-                 this.t_indices.push(s.indices[j] + offset);
-            }
-
-            this.t_positions = this.t_positions.concat(s.positions);
-            this.t_normals = this.t_normals.concat(s.normals);
-        }
-        for(var i = 0; i < this.t_positions.length; i++)
-        {
-
-            this.t_colors.push(this.color[0]);
-            this.t_colors.push(this.color[1]);
-            this.t_colors.push(this.color[2]);
-            this.t_colors.push(1);
-
-
-        }
+        this.loadTempBuffers();
 
         this.normals = new Float32Array(this.t_normals);
         this.positions = new Float32Array(this.t_positions);

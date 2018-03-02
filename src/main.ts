@@ -41,11 +41,12 @@ function loadScene() {
   
   city = new City(numIter);
   buildings = city.buildings;
+  city.create();
 
-  for(let b of buildings)
+/*  for(let b of buildings)
   {
     b.create();
-  }
+  }*/
 }
 
 function main() {
@@ -94,8 +95,8 @@ function main() {
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
-    var toDraw = [groundplane];
-    toDraw = toDraw.concat(buildings);
+    var toDraw = [groundplane, city];
+    //toDraw = toDraw.concat(buildings);
    // toDraw.concat
     renderer.render(camera, lambert, toDraw);
     stats.end();

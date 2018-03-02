@@ -7,7 +7,7 @@ import ShapeSet from './ShapeSet'
 const PI = Math.PI;
 const deg2rad = PI / 180.0;
 
-class City {
+class City extends Drawable {
 
     buildings: Array<ShapeSet>;
     building: ShapeSet;
@@ -31,8 +31,20 @@ class City {
     min_x_pos: number;
     min_z_pos: number;
 
+    indices: Uint32Array;
+    positions: Float32Array;
+    normals: Float32Array;
+    colors: Float32Array;
+    center: vec4;
+
+    t_indices: Array<number> = new Array(); // temp arrays that hold all the shapes
+    t_positions: Array<number> = new Array();
+    t_normals: Array<number> = new Array();
+    t_colors: Array<number> = new Array();
+
     constructor(iter: number)
     {
+        super();
        // debugger;
         this.buildings = new Array<ShapeSet>();
 
@@ -84,6 +96,47 @@ class City {
         }
 
         this.parseShapeGrammar(iter);   
+    }
+
+    create()
+    {
+         // go through every shape in the set, and append their normals and positions to shapeSet data
+         for(let s of this.buildings)
+         {
+             s.loadTempBuffers();
+             var offset = Math.floor(this.t_positions.length / 4.0);
+             for(var j = 0; j < s.t_indices.length; j++)
+             {
+                  this.t_indices.push(s.t_indices[j] + offset);
+             }
+ 
+             this.t_positions = this.t_positions.concat(s.t_positions);
+             this.t_normals = this.t_normals.concat(s.t_normals);
+             this.t_colors = this.t_colors.concat(s.t_colors);
+         }
+
+         this.normals = new Float32Array(this.t_normals);
+         this.positions = new Float32Array(this.t_positions);
+         this.indices = new Uint32Array(this.t_indices);
+         this.colors = new Float32Array(this.t_colors);
+ 
+         this.generateIdx();
+         this.generatePos();
+         this.generateNor();
+         this.generateCol();
+     
+         this.count = this.indices.length;
+         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufIdx);
+         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
+     
+         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufNor);
+         gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.STATIC_DRAW);
+     
+         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufPos);
+         gl.bufferData(gl.ARRAY_BUFFER, this.positions, gl.STATIC_DRAW);
+ 
+         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufCol);
+         gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
     }
 
     randomRule(distfromHDA1: number, distfromHDA2 : number, distfromHDA3 : number) : string
