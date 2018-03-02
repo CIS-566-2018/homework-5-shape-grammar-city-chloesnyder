@@ -1,6 +1,8 @@
 
 # Project 5: Shape Grammar
 
+Please note you need to press "Load City" to propogate changes made to number of iterations. Increasing iterations will slow the program. This refers to how many times the city generation grammar is parsed. All cities are initially seeded with 23 buildings with successors programmed to subdivide.
+
 https://cis-460-f2017.github.io/homework-5-shape-grammar-city-chloesnyder/ 
 
 ![](pic1.png)
