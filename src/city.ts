@@ -25,8 +25,6 @@ class City {
 
     rad3: number;
 
-
-
     // the max/min positions that buildings can be placed at
     max_x_pos: number;
     max_z_pos: number;
@@ -52,21 +50,16 @@ class City {
         this.rad3 = 1 + Math.random();
 
         // Seed buildings in the high density areas
+        // we only parse the shape grammar to make a building if the building is terminal
         var building1 = new ShapeSet(5.0, this.highDensityArea1[0], this.highDensityArea1[2]);
-        var iter1 = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
-      //  building1.parseShapeGrammar(iter1);
-     //   building1.isTerminal = false;
+        building1.isTerminal = false;
         building1.symbol = "S";
   
         var building2 = new ShapeSet(5.0, this.highDensityArea2[0], this.highDensityArea2[2]);
-        var iter2 = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
-      //  building2.parseShapeGrammar(iter2);
-       // building2.isTerminal = false;
         building2.symbol = "S";
+        building2.isTerminal = false;
 
         var building3 = new ShapeSet(5.0, this.highDensityArea3[0], this.highDensityArea3[2]);
-       // var iter3 = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
-       // building3.parseShapeGrammar(iter3);
         building3.isTerminal = false;
         building3.symbol = "S";
 
@@ -85,50 +78,40 @@ class City {
             if(pz > .5) z *= -1;
 
             var b = new ShapeSet(1.0, x, z);
-          //  var iter = 1;
             b.isTerminal = false;
             b.symbol = "S";
-           // b.parseShapeGrammar(iter);
             this.buildings.push(b);
         }
 
         this.parseShapeGrammar();   
     }
 
-    randomRule(b : ShapeSet) : string
+    randomRule(distfromHDA1: number, distfromHDA2 : number, distfromHDA3 : number) : string
     {
-       // debugger;
-        var parentPos = b.position;
-       
-        var distfromHDA1 = vec3.distance(parentPos, this.highDensityArea1);
-        var distfromHDA2 = vec3.distance(parentPos, this.highDensityArea2);
-        var distfromHDA3 = vec3.distance(parentPos, this.highDensityArea3);
-        
         var condition = Math.random(); 
-
 
         // if it is close to a high density, make it more likely to subdivide
         if(distfromHDA1 < this.rad1 || distfromHDA2 < this.rad2 || distfromHDA3 < this.rad3)
         {
-            if(condition < (1/2))
+            if(condition < (.5))
             {
                 return "S";
-            } else if (condition > (1/2) && condition < (1/2 + 1/3)) {
+            } else if (condition > (.5) && condition < (.5 + .1666)) {
                 return "X";
-            } else if (condition > (1/2 + 1/3) && condition < (1/2 + 2/3)) {
+            } else if (condition > (.5 + .1333) && condition < (.5 + .333)) {
                 return "Z";
-            } else if (condition > (1/2 + 2/3) && condition < (1)) {
+            } else if (condition > (.5 + .333) && condition < (1)) {
                 return "D";
             } 
         } else {
-            if(condition < (1/4))
+            if(condition < (.25))
             {
                 return "S";
-            } else if (condition > (1/4) && condition < (2/4)) {
+            } else if (condition > (.25) && condition < (.5)) {
                 return "X";
-            } else if (condition > (2/4) && condition < (3/4)) {
+            } else if (condition > (.5) && condition < (.75)) {
                 return "Z";
-            } else if (condition > (3/5) && condition < (1)) {
+            } else if (condition > (.75) && condition < (1)) {
                 return "D";
             } 
         }
@@ -155,37 +138,14 @@ class City {
             var b2 = new ShapeSet(childScale, parentPos[0] - childScale, parentPos[2] + childScale);
             var b3 = new ShapeSet(childScale, parentPos[0] + childScale, parentPos[2] - childScale);
             var b4 = new ShapeSet(childScale, parentPos[0] - childScale, parentPos[2] - childScale);
-            b1.symbol = this.randomRule(b1);
-            b1.isTerminal = Math.random() > .25; // 75% chance it will become a terminal building
-            b2.symbol = this.randomRule(b2);
-            b2.isTerminal = Math.random() > .25; 
-            b3.symbol = this.randomRule(b3);
-            b3.isTerminal = Math.random() > .25; 
-            b4.symbol = this.randomRule(b4);
-            b4.isTerminal = Math.random() > .25; 
-
-            // only want to generate a complex building if it's terminal
-            var iter1, iter2, iter3, iter4 = 1;
-            if(b1.isTerminal)
-            {
-                iter1 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b1.parseShapeGrammar(iter1);
-            }
-            if(b2.isTerminal)
-            {
-                iter2 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b2.parseShapeGrammar(iter2);
-            }
-            if(b3.isTerminal)
-            {
-                iter3 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b3.parseShapeGrammar(iter3);
-            }
-            if(b4.isTerminal)
-            {
-                iter4 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b4.parseShapeGrammar(iter4);
-            }
+            b1.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
+            b1.isTerminal = Math.random() < .333; // 1/3 chance it will become a terminal building
+            b2.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
+            b2.isTerminal = Math.random() < .333; 
+            b3.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
+            b3.isTerminal = Math.random() < .333; 
+            b4.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
+            b4.isTerminal = Math.random() < .333; 
 
             successors.push(b1);
             successors.push(b2);
@@ -197,22 +157,10 @@ class City {
             var b1x = new ShapeSet(parentScale / 2, parentPos[0] + parentScale / 2, parentPos[2]);
             var b2x = new ShapeSet(parentScale / 2, parentPos[0], parentPos[2]);
             
-            b1x.symbol = this.randomRule(b1x);
+            b1x.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
             b1x.isTerminal = Math.random() > .5;
-            b2x.symbol = this.randomRule(b2x);
+            b2x.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
             b2x.isTerminal = Math.random() > .5;
-
-            var iter11, iter22 = 1;
-            if(b1x.isTerminal)
-            {
-                iter11 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b1x.parseShapeGrammar(iter11);
-            }
-            if(b2x.isTerminal)
-            {
-                iter22 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b2x.parseShapeGrammar(iter22);
-            }
             
             successors.push(b1x);
             successors.push(b2x);
@@ -223,22 +171,10 @@ class City {
             var b1z = new ShapeSet(parentScale / 2, parentPos[0], parentPos[2] + parentScale / 2);
             var b2z = new ShapeSet(parentScale / 2, parentPos[0], parentPos[2]);
 
-            b1z.symbol = this.randomRule(b1z);
+            b1z.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
             b1z.isTerminal = Math.random() > .5;
-            b2z.symbol = this.randomRule(b2z);
+            b2z.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
             b2z.isTerminal = Math.random() > .5;
-
-            var iter111, iter222 = 1;
-            if(b1z.isTerminal)
-            {
-                iter111 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b1z.parseShapeGrammar(iter111);
-            }
-            if(b2z.isTerminal)
-            {
-                iter222 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
-                b2z.parseShapeGrammar(iter222);
-            }
 
             successors.push(b1z);
             successors.push(b2z);
@@ -265,7 +201,7 @@ class City {
 
     parseShapeGrammar()
     {
-        for(var i = 0; i < 8; ++i)
+        for(var i = 0; i < 3; ++i)
         {
             for(let b of this.buildings)
             {
@@ -276,6 +212,13 @@ class City {
                    this.applyRule(b, b.symbol);
                 }
             }
+        }
+
+        // after all rules have been applied, go through each building and 
+        // parse the shape grammar so that it's complex
+        for(let bb of this.buildings)
+        {
+            bb.parseShapeGrammar(Math.ceil(Math.random() * (5 - 1 + 2) + 1));
         }
     }
 
