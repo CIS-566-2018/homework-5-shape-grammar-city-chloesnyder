@@ -31,9 +31,12 @@ class  ShapeSet extends Drawable
     sy: number;
     sz: number;
 
+    isTerminal: boolean; // for parsing a city, treating shapesets as shapes (buidlings)
+
     constructor(scale: number, xpos: number, zpos: number)
     {
         super();
+        this.isTerminal = false;
         this.sx = 5 * scale;
         this.sy = 5 * scale;
         this.sz = 5 * scale;

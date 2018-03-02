@@ -12,6 +12,7 @@ import ShapeSet from './ShapeSet';
 import Rule from './rule';
 import Mesh from './geometry/Mesh';
 import * as fs from 'fs';
+import City from './city';
 
 var OBJ = require('webgl-obj-loader');
 // Define an object with application parameters and button callbacks
@@ -68,7 +69,9 @@ function loadScene() {
   groundplane.create();
   buildings = new Array<ShapeSet>();
 
-
+  // use noise to determine a "population density"
+  // add more buildings to "high density" areas that are taller
+  // add fewer buildings to "low density" areas
   for(var i = 0; i < 5; i++)
   {
     var x = Math.random() * 8;
