@@ -54,19 +54,19 @@ class City {
         // Seed buildings in the high density areas
         var building1 = new ShapeSet(5.0, this.highDensityArea1[0], this.highDensityArea1[2]);
         var iter1 = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
-        building1.parseShapeGrammar(iter1);
-        building1.isTerminal = false;
+      //  building1.parseShapeGrammar(iter1);
+     //   building1.isTerminal = false;
         building1.symbol = "S";
   
         var building2 = new ShapeSet(5.0, this.highDensityArea2[0], this.highDensityArea2[2]);
         var iter2 = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
-        building2.parseShapeGrammar(iter2);
-        building2.isTerminal = false;
+      //  building2.parseShapeGrammar(iter2);
+       // building2.isTerminal = false;
         building2.symbol = "S";
 
         var building3 = new ShapeSet(5.0, this.highDensityArea3[0], this.highDensityArea3[2]);
-        var iter3 = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
-        building3.parseShapeGrammar(iter3);
+       // var iter3 = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
+       // building3.parseShapeGrammar(iter3);
         building3.isTerminal = false;
         building3.symbol = "S";
 
@@ -85,10 +85,10 @@ class City {
             if(pz > .5) z *= -1;
 
             var b = new ShapeSet(1.0, x, z);
-            var iter = 1;
+          //  var iter = 1;
             b.isTerminal = false;
             b.symbol = "S";
-            b.parseShapeGrammar(iter);
+           // b.parseShapeGrammar(iter);
             this.buildings.push(b);
         }
 
@@ -132,6 +132,7 @@ class City {
                 return "D";
             } 
         }
+
     }
 
     applyRule(b: ShapeSet, rule: string)
@@ -155,37 +156,36 @@ class City {
             var b3 = new ShapeSet(childScale, parentPos[0] + childScale, parentPos[2] - childScale);
             var b4 = new ShapeSet(childScale, parentPos[0] - childScale, parentPos[2] - childScale);
             b1.symbol = this.randomRule(b1);
-            b1.isTerminal = Math.random() < .25; // 75% chance it will not become a terminal building
+            b1.isTerminal = Math.random() > .25; // 75% chance it will become a terminal building
             b2.symbol = this.randomRule(b2);
-            b2.isTerminal = Math.random() < .25; 
+            b2.isTerminal = Math.random() > .25; 
             b3.symbol = this.randomRule(b3);
-            b3.isTerminal = Math.random() < .25; 
+            b3.isTerminal = Math.random() > .25; 
             b4.symbol = this.randomRule(b4);
-            b4.isTerminal = Math.random() < .25; 
+            b4.isTerminal = Math.random() > .25; 
 
             // only want to generate a complex building if it's terminal
             var iter1, iter2, iter3, iter4 = 1;
             if(b1.isTerminal)
             {
                 iter1 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b1.parseShapeGrammar(iter1);
             }
             if(b2.isTerminal)
             {
                 iter2 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b2.parseShapeGrammar(iter2);
             }
             if(b3.isTerminal)
             {
                 iter3 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b3.parseShapeGrammar(iter3);
             }
             if(b4.isTerminal)
             {
                 iter4 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b4.parseShapeGrammar(iter4);
             }
-
-            b1.parseShapeGrammar(iter1);
-            b2.parseShapeGrammar(iter2);
-            b3.parseShapeGrammar(iter3);
-            b4.parseShapeGrammar(iter4);
 
             successors.push(b1);
             successors.push(b2);
@@ -206,13 +206,13 @@ class City {
             if(b1x.isTerminal)
             {
                 iter11 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b1x.parseShapeGrammar(iter11);
             }
             if(b2x.isTerminal)
             {
                 iter22 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b2x.parseShapeGrammar(iter22);
             }
-            b1x.parseShapeGrammar(iter11);
-            b2x.parseShapeGrammar(iter22);
             
             successors.push(b1x);
             successors.push(b2x);
@@ -232,13 +232,13 @@ class City {
             if(b1z.isTerminal)
             {
                 iter111 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b1z.parseShapeGrammar(iter111);
             }
             if(b2z.isTerminal)
             {
                 iter222 = Math.ceil(Math.random() * (4 - 1 + 2) + 1);
+                b2z.parseShapeGrammar(iter222);
             }
-            b1z.parseShapeGrammar(iter111);
-            b2z.parseShapeGrammar(iter222);
 
             successors.push(b1z);
             successors.push(b2z);
@@ -265,7 +265,7 @@ class City {
 
     parseShapeGrammar()
     {
-        for(var i = 0; i < 20; ++i)
+        for(var i = 0; i < 8; ++i)
         {
             for(let b of this.buildings)
             {
