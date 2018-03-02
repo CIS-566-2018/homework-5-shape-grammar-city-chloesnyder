@@ -42,7 +42,7 @@ class Shape {
         
        if(sym === "C")
         {
-            //roof
+            //column
             this. mesh.loadBuffers(this.readTextFile('src/objs/cylinder.obj'));
         } else if (sym === "B") {
             this.mesh.loadBuffers(this.readTextFile('src/objs/bridge.obj'));

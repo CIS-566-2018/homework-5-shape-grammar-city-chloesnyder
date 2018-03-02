@@ -51,15 +51,15 @@ class City {
 
         // Seed buildings in the high density areas
         // we only parse the shape grammar to make a building if the building is terminal
-        var building1 = new ShapeSet(5.0, this.highDensityArea1[0], this.highDensityArea1[2]);
+        var building1 = new ShapeSet(6.0, this.highDensityArea1[0], this.highDensityArea1[2]);
         building1.isTerminal = false;
         building1.symbol = "S";
   
-        var building2 = new ShapeSet(5.0, this.highDensityArea2[0], this.highDensityArea2[2]);
+        var building2 = new ShapeSet(4.0, this.highDensityArea2[0], this.highDensityArea2[2]);
         building2.symbol = "S";
         building2.isTerminal = false;
 
-        var building3 = new ShapeSet(5.0, this.highDensityArea3[0], this.highDensityArea3[2]);
+        var building3 = new ShapeSet(3.0, this.highDensityArea3[0], this.highDensityArea3[2]);
         building3.isTerminal = false;
         building3.symbol = "S";
 
@@ -77,7 +77,7 @@ class City {
             var pz = Math.random();
             if(pz > .5) z *= -1;
 
-            var b = new ShapeSet(1.0, x, z);
+            var b = new ShapeSet(Math.random() * 2.0, x, z);
             b.isTerminal = false;
             b.symbol = "S";
             this.buildings.push(b);
