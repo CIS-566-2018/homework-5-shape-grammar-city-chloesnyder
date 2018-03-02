@@ -31,7 +31,12 @@ class  ShapeSet extends Drawable
     sy: number;
     sz: number;
 
+    //sym : String;
     isTerminal: boolean; // for parsing a city, treating shapesets as shapes (buidlings)
+    position : vec3;
+    scale_vec : vec3;
+    scale : number;
+    symbol : string;
 
     constructor(scale: number, xpos: number, zpos: number)
     {
@@ -40,9 +45,17 @@ class  ShapeSet extends Drawable
         this.sx = 5 * scale;
         this.sy = 5 * scale;
         this.sz = 5 * scale;
+
+        this.scale = scale;
+        this.symbol = "";
+
         // starting height between .5 and sy/
         var ypos = Math.random() * (this.sy/2 - .5) + .5;
-        this.shapes.push(new Shape("S", false, vec3.fromValues(xpos, ypos, zpos), vec3.fromValues(0, 0, 0), vec3.fromValues(this.sx,this.sy,this.sz)));
+        
+        this.position = vec3.fromValues(xpos, ypos, zpos);
+        this.scale_vec = vec3.fromValues(this.sx,this.sy,this.sz);
+  
+        this.shapes.push(new Shape("S", false, this.position, vec3.fromValues(0, 0, 0), this.scale_vec));
     }
 
     create()
@@ -231,7 +244,7 @@ class  ShapeSet extends Drawable
 
                  // if parent position y is greater than 0, then we can move the floors down but don't otherwise
                 var transYDownBy = 0;
-                if(parentPos[1] > 0)
+                if(parentPos[1] > .5)
                 {
                     transYDownBy = Math.random() / 2;
                 }
@@ -244,7 +257,7 @@ class  ShapeSet extends Drawable
                 var isBottomTerminal1 = Math.random() > .5;
 
 
-                if(parentPos[1] > 0)
+                if(parentPos[1] > .5)
                 {
                     transYDownBy = Math.random() / 2;
                 }      
@@ -256,7 +269,7 @@ class  ShapeSet extends Drawable
                 var isBottomTerminal2 = Math.random() > .5;
 
 
-                if(parentPos[1] > 0)
+                if(parentPos[1] > .5)
                 {
                     transYDownBy = Math.random() / 2;
                 }
@@ -267,7 +280,7 @@ class  ShapeSet extends Drawable
                 var isTopTerminal3 = Math.random() > .5;
                 var isBottomTerminal3 = Math.random() > .5;
 
-                if(parentPos[1] > 0)
+                if(parentPos[1] > .5)
                 {
                     transYDownBy = Math.random() / 2;
                 }

@@ -30,6 +30,7 @@ let square: Square;
 let building: ShapeSet;
 let buildings: Array<ShapeSet>;
 let groundplane: ShapeSet;
+let city : City;
 let mesh: Mesh;
 
  //https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file
@@ -67,25 +68,13 @@ function loadScene() {
   groundplane = new ShapeSet(1.0, 0, 0);
   groundplane.addGround();
   groundplane.create();
-  buildings = new Array<ShapeSet>();
+  
+  city = new City();
+  buildings = city.buildings;
 
-  // use noise to determine a "population density"
-  // add more buildings to "high density" areas that are taller
-  // add fewer buildings to "low density" areas
-  for(var i = 0; i < 5; i++)
+  for(let b of buildings)
   {
-    var x = Math.random() * 8;
-    var z = Math.random() * 8;
-    var px = Math.random();
-    if(px > .5) x *= -1;
-    var pz = Math.random();
-    if(pz > .5) z *= -1;
-
-    building = new ShapeSet(1.0, x, z);
-    var iter = Math.ceil(Math.random() * (6 - 1 + 2) + 1);
-    building.parseShapeGrammar(iter);
-    building.create();
-    buildings.push(building);
+    b.create();
   }
 }
 
