@@ -9,7 +9,6 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Shape from './shape';
 import ShapeSet from './ShapeSet';
-import Rule from './rule';
 import Mesh from './geometry/Mesh';
 import * as fs from 'fs';
 import City from './city';
@@ -19,10 +18,7 @@ var OBJ = require('webgl-obj-loader');
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   iterations: 1,
-  angle : 45,
-  distance : 3.0, 
-  axiom : "X",
-  'Load LSystem': loadScene, // A function pointer, essentially
+  'Load City': loadScene, // A function pointer, essentially
 };
 
 let icosphere: Icosphere;
@@ -33,43 +29,17 @@ let groundplane: ShapeSet;
 let city : City;
 let mesh: Mesh;
 
- //https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file
- function readTextFile(file: string) : string
- {
-     var text = "";
-     var rawFile = new XMLHttpRequest();
-     rawFile.open("GET", file, false);
-     rawFile.onreadystatechange = function ()
-     {
-         if(rawFile.readyState === 4)
-         {
-             if(rawFile.status === 200 || rawFile.status == 0)
-             {
-                 var allText = rawFile.responseText;
-                 text = allText;
-             }
-         }
-     }
-     rawFile.send(null);
-     return text;
- }
 
 function loadScene() {
   
   var numIter = controls.iterations; 
-  var axiom = controls.axiom; 
-  var angle = controls.angle; 
-  var distance = controls.distance; 
-
-  var instructions = new Rule().createLSystem(numIter, axiom);
-
 
   // generate a ground plane
   groundplane = new ShapeSet(1.0, 0, 0);
   groundplane.addGround();
   groundplane.create();
   
-  city = new City();
+  city = new City(numIter);
   buildings = city.buildings;
 
   for(let b of buildings)
@@ -90,11 +60,8 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  gui.add(controls, 'iterations', 0, 25).step(1);
-  gui.add(controls, 'angle', 0, 360).step(1);
-  gui.add(controls, 'distance', 0, 5).step(.5);
-  gui.add(controls, 'axiom');
-  gui.add(controls, 'Load LSystem');
+  gui.add(controls, 'iterations', 1, 10).step(1);
+  gui.add(controls, 'Load City');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -120,34 +87,6 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
   ]);
 
-  const lambert2 = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag2.glsl')),
-  ]);
-
-  const lambert3 = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag3.glsl')),
-  ]);
-
-  const lambert4 = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag4.glsl')),
-  ]);
-
-  var shader = lambert;
-  var chooseShader = Math.floor(Math.random() * (4));
-  if(chooseShader == 1)
-  {
-    shader = lambert;
-  } else if (chooseShader == 2) {
-    shader = lambert2;
-  } else if (chooseShader == 3) {
-    shader = lambert3;
-  } else {
-    shader = lambert4;
-  }
-
 
   // This function will be called every frame
   function tick() {
@@ -158,7 +97,7 @@ function main() {
     var toDraw = [groundplane];
     toDraw = toDraw.concat(buildings);
    // toDraw.concat
-    renderer.render(camera, shader, toDraw);
+    renderer.render(camera, lambert, toDraw);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

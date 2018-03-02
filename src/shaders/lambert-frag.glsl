@@ -26,7 +26,7 @@ out vec4 out_Col; // This is the final output color that you will see on your
 void main()
 {
     // Material base color (before shading)
-        vec4 diffuseColor = vec4(1,1,1,1);
+        vec4 diffuseColor = fs_Col;
         // texture windows on x and z planes
      /*   float x = fs_Pos.x;
         float y = fs_Pos.y;

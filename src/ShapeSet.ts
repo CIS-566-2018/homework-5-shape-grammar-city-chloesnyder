@@ -18,12 +18,13 @@ class  ShapeSet extends Drawable
     indices: Uint32Array;
     positions: Float32Array;
     normals: Float32Array;
-  //  colors: Floar32Array;
+    colors: Float32Array;
     center: vec4;
 
     t_indices: Array<number> = new Array(); // temp arrays that hold all the shapes
     t_positions: Array<number> = new Array();
     t_normals: Array<number> = new Array();
+    t_colors: Array<number> = new Array();
 
     shapes: Array<Shape> = new Array();
 
@@ -37,6 +38,7 @@ class  ShapeSet extends Drawable
     scale_vec : vec3;
     scale : number;
     symbol : string;
+    color : vec3;
 
     constructor(scale: number, xpos: number, zpos: number)
     {
@@ -56,6 +58,7 @@ class  ShapeSet extends Drawable
         this.scale_vec = vec3.fromValues(this.sx,this.sy,this.sz);
   
         this.shapes.push(new Shape("S", false, this.position, vec3.fromValues(0, 0, 0), this.scale_vec));
+        this.color = vec3.fromValues(1, 1, 1);
     }
 
     create()
@@ -72,13 +75,26 @@ class  ShapeSet extends Drawable
             this.t_positions = this.t_positions.concat(s.positions);
             this.t_normals = this.t_normals.concat(s.normals);
         }
+        for(var i = 0; i < this.t_positions.length; i++)
+        {
+
+            this.t_colors.push(this.color[0]);
+            this.t_colors.push(this.color[1]);
+            this.t_colors.push(this.color[2]);
+            this.t_colors.push(1);
+
+
+        }
+
         this.normals = new Float32Array(this.t_normals);
         this.positions = new Float32Array(this.t_positions);
         this.indices = new Uint32Array(this.t_indices);
+        this.colors = new Float32Array(this.t_colors);
 
         this.generateIdx();
         this.generatePos();
         this.generateNor();
+        this.generateCol();
     
         this.count = this.indices.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufIdx);
@@ -89,85 +105,17 @@ class  ShapeSet extends Drawable
     
         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufPos);
         gl.bufferData(gl.ARRAY_BUFFER, this.positions, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufCol);
+        gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
     }
 
     // creates a ground plane
     addGround()
     {
         this.shapes = new Array<Shape>();
-        this.shapes.push(new Shape("", true, vec3.fromValues(0, 0, 0), vec3.fromValues(0,0,0), vec3.fromValues(20, .2, 20)));
+        this.shapes.push(new Shape("", true, vec3.fromValues(0, 0, 0), vec3.fromValues(0,0,0), vec3.fromValues(22, .2, 22)));
     }
-
-  /*  addBridges(columns: Array<Shape>)
-    {
-        for(var i = 0; i < columns.length; i++)
-        {
-            var c = columns[i];//new Shape("", true, columns[i].position, columns[i].rotation, columns[i].scale);
-            // remove the column from the set
-            columns.splice(i, 1);
-            if(columns.length > 1)
-            {
-                // randomly choose another column to connect it to
-                var idx = Math.floor(Math.random() * columns.length);
-                var c2 = columns[idx];
-                // want it to have the same x or z pos
-                var xSame = c2.position[0] != c.position[0];
-                var zSame = c2.position[2] != c.position[2];  
-                while(!xSame && !zSame)
-                {
-                    idx = Math.floor(Math.random() * columns.length);
-                    c2 = columns[idx];
-                    xSame = c2.position[0] != c.position[0];
-                    zSame = c2.position[2] != c.position[2];  
-                }
-
-                // remove this column from list of columsn so we can't draw anymore bridges
-                columns.splice(idx, 1);
-
-                var bridgePos = vec3.create();
-                var bridgeScale = vec3.create();
-                var bridgeRot = vec3.create();
-
-                var yAngle = 0;
-
-                if(xSame)
-                {
-                    //if x same, draw bridge from one column to the other along the x axis
-                    yAngle = PI/2;
-
-                } else if (zSame)
-                {
-                     //if z same, draw bridge from one column to the other along z axis
-                     yAngle = 0;
-
-                }
-
-                bridgePos = vec3.fromValues((c.position[0] - c2.position[0])/2, c.position[1]/2, (c.position[2] - c2.position[2])/2);
-                //vec3.fromValues(((c.position[0] - (c.scale[0]/2)) + (c2.position[0] - (c2.scale[0]/2)))/2, (((c.position[1] - (c.scale[1]/2)) + (c2.position[1] - (c2.scale[1]/2))) + (Math.random()/2))/2, ((c.position[2] - (c.scale[2]/2)) + (c2.position[2] - (c2.scale[2]/2)))/2);
-                bridgeScale;
-                bridgeRot;
-
-                bridgeRot = vec3.fromValues(0, yAngle, yAngle);
-
-                var scaleZ = Math.min(c2.scale[2], c.scale[2]);
-                var scaleY = Math.min(c2.scale[1], c.scale[1]);
-                var scaleX = Math.min(c2.scale[0], c.scale[0]);
-
-                // get z distance between the cylinders
-                var dx = Math.abs((c2.position[0] - (c2.scale[0]/2)) - (c.position[0]) - (c.scale[0]/2));
-                var dz = Math.abs((c2.position[2] - (c2.scale[2]/2)) - (c.position[2]) - (c.scale[2]/2));
-                if(dx > dz)
-                {
-                    scaleZ = dz;
-                } else {
-                    scaleX = dx;
-                }
-                
-                this.shapes.push(new Shape("B", true, bridgePos, bridgeRot, vec3.fromValues(scaleX, scaleY, scaleZ)));
-            }
-        }
-    }*/
-
     addColumns()
     {
         // add "columns" below all shapes not already at ground level
@@ -185,7 +133,6 @@ class  ShapeSet extends Drawable
           }
         }
         this.shapes = this.shapes.concat(columns);
-       // this.addBridges(columns);
     }
 
     //Apply rules to all shpaes in our shape set for n iterations

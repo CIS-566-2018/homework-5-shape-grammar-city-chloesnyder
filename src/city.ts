@@ -31,7 +31,7 @@ class City {
     min_x_pos: number;
     min_z_pos: number;
 
-    constructor()
+    constructor(iter: number)
     {
        // debugger;
         this.buildings = new Array<ShapeSet>();
@@ -83,7 +83,7 @@ class City {
             this.buildings.push(b);
         }
 
-        this.parseShapeGrammar();   
+        this.parseShapeGrammar(iter);   
     }
 
     randomRule(distfromHDA1: number, distfromHDA2 : number, distfromHDA3 : number) : string
@@ -129,6 +129,11 @@ class City {
         var distfromHDA2 = vec3.distance(parentPos, this.highDensityArea2);
         var distfromHDA3 = vec3.distance(parentPos, this.highDensityArea3);
 
+        //set building color as a function of its distance from a population center
+        // i.e., buildings closer to HDA1 are more red
+        // buildings closer to HDA1 are more green
+        /// buildings closer to HDA2 are more blue
+
         let doDelete = true;
         if(rule === "S")
         {
@@ -147,6 +152,11 @@ class City {
             b4.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
             b4.isTerminal = Math.random() < .333; 
 
+            b1.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
+            b2.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
+            b3.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
+            b4.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
+
             successors.push(b1);
             successors.push(b2);
             successors.push(b3);
@@ -161,6 +171,9 @@ class City {
             b1x.isTerminal = Math.random() > .5;
             b2x.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
             b2x.isTerminal = Math.random() > .5;
+
+            b1x.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
+            b2x.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
             
             successors.push(b1x);
             successors.push(b2x);
@@ -175,6 +188,9 @@ class City {
             b1z.isTerminal = Math.random() > .5;
             b2z.symbol = this.randomRule(distfromHDA1, distfromHDA2, distfromHDA3);
             b2z.isTerminal = Math.random() > .5;
+
+            b1z.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
+            b2z.color = vec3.fromValues(1 / distfromHDA1, 1 / distfromHDA2, 1 / distfromHDA3);
 
             successors.push(b1z);
             successors.push(b2z);
@@ -199,9 +215,9 @@ class City {
         }
     }
 
-    parseShapeGrammar()
+    parseShapeGrammar(iter : number)
     {
-        for(var i = 0; i < 3; ++i)
+        for(var i = 0; i < iter; ++i)
         {
             for(let b of this.buildings)
             {
